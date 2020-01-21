@@ -1,17 +1,21 @@
 version: '3'
 services:
   swagger-ui:
-    image: swaggerapi/swagger-ui
+    build: ./swagger-ui
     ports:
-      - 8000:8080
+      - 3200:3200
     volumes:
-      - ./docs:/usr/share/nginx/html
-  swagger-watch:
-    build: ./swagger-watch
+      - ./swagger-ui/webpack/docker-dev.babel.js:/swagger-ui/webpack/docker-dev.babel.js
+      - ./swagger-ui/dev-helpers/index.html:/swagger-ui/dev-helpers/index.html
+      - ./swagger-ui/dev-helpers/swagger.yaml:/swagger-ui/dev-helpers/swagger.yaml
+    working_dir: /swagger-ui
+    command: 'npx webpack-dev-server --config webpack/docker-dev.babel.js'
+  watcher:
+    build: ./watcher
     volumes:
-      - ./swagger-watch:/app
+      - ./watcher:/app
       - /app/node_modules
       - ./src:/src
-      - ./docs/swagger.yml:/docs/swagger.yml
+      - ./swagger-ui/dev-helpers/swagger.yaml:/dist/swagger.yaml
     working_dir: /app
     command: 'node index.js'
